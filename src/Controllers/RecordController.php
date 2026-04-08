@@ -1,17 +1,50 @@
 <?php
 
-namespace Crud\Controllers;
-
-use Crud\Models\Record;
-use Crud\Views\RecordView;
-
 class RecordController
 {
-    public function get()
+    private const PER_PAGE = 10;
+
+    public function index(): array
     {
-        $model = new Record();
-        $data = $model->loadData();
-        $html = RecordView::getTemplate($data);
-        return $html;
+        return Record::all();
+    }
+
+    public function paginate(int $page = 1): array
+    {
+        return Record::paginate($page, self::PER_PAGE);
+    }
+
+    public function totalPages(): int
+    {
+        return (int)ceil(Record::count() / self::PER_PAGE);
+    }
+
+    public function show(int $id): ?Record
+    {
+        return Record::find($id);
+    }
+
+    public function insert(array $data): Record
+    {
+        $record = new Record();
+        $record->name = $data['name'];
+        $record->save();
+        return $record;
+    }
+
+    public function update(int $id, array $data): ?Record
+    {
+        $record = Record::find($id);
+        if (!$record) return null;
+
+        $record->name = $data['name'] ?? $record->name;
+        $record->save();
+        return $record;
+    }
+
+    public function delete(int $id): bool
+    {
+        $record = Record::find($id);
+        return $record ? $record->delete() : false;
     }
 }
